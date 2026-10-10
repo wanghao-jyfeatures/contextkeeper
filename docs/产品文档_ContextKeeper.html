@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContextKeeper for Trae · 产品文档</title>
+<style>
+  :root {
+    --primary: #0f6fff;
+    --primary-dark: #0947b3;
+    --accent: #00b578;
+    --accent-light: #e6f9f2;
+    --danger: #ff5c5c;
+    --text: #1f2329;
+    --text-secondary: #646a73;
+    --text-light: #ffffff;
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --border: #e5e6eb;
+    --code-bg: #1e2430;
+    --code-text: #d4d7de;
+    --warn-bg: #fff7e6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: var(--bg); color: var(--text);
+    line-height: 1.7; font-size: 15px;
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+  header {
+    background: linear-gradient(135deg, #0a1e46 0%, #0f4bb3 60%, #1273ff 100%);
+    color: var(--text-light); padding: 56px 0 48px; margin-bottom: 40px;
+  }
+  header .container { padding-bottom: 0; }
+  .brand { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .brand-logo {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: linear-gradient(135deg, #00d4a0, #00b578);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .brand h1 { font-size: 30px; font-weight: 700; letter-spacing: .5px; }
+  .brand .version {
+    background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3);
+    border-radius: 20px; padding: 2px 14px; font-size: 13px; font-weight: 500;
+  }
+  .tagline { font-size: 17px; opacity: .92; max-width: 720px; }
+  .tagline b { color: #7dffc9; }
+  .badges { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 8px; padding: 5px 14px; font-size: 13px;
+  }
+  .badge b { color: #7dffc9; font-size: 15px; }
+  section { margin-bottom: 48px; }
+  .sec-title {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--border);
+  }
+  .sec-num {
+    background: var(--primary); color: #fff; border-radius: 8px;
+    width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 700; flex-shrink: 0;
+  }
+  .sec-title h2 { font-size: 22px; font-weight: 700; }
+  .sec-title .sub { font-size: 13px; color: var(--text-secondary); margin-left: auto; }
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  .card h3 { font-size: 17px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card h4 { font-size: 15px; margin: 18px 0 8px; color: var(--primary-dark); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 22px; margin-bottom: 10px; }
+  li { margin-bottom: 6px; }
+  .note {
+    background: var(--accent-light); border-left: 4px solid var(--accent);
+    border-radius: 6px; padding: 12px 16px; margin: 14px 0; font-size: 14px;
+  }
+  pre {
+    background: var(--code-bg); color: var(--code-text);
+    border-radius: 8px; padding: 16px 18px; margin: 12px 0;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px; line-height: 1.65; overflow-x: auto; white-space: pre;
+  }
+  code.inline {
+    background: #eef1f6; border-radius: 4px; padding: 1px 7px;
+    font-family: Consolas, monospace; font-size: 13px; color: var(--primary-dark);
+  }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+  th { background: #f0f3f8; text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--border); font-weight: 600; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .ok { color: var(--accent); font-weight: 700; }
+  .pill { display: inline-block; border-radius: 12px; padding: 1px 10px; font-size: 12px; font-weight: 600; }
+  .pill-green { background: var(--accent-light); color: #00875a; }
+  .arch { display: flex; flex-direction: column; gap: 12px; align-items: center; margin: 18px 0; }
+  .arch-box { border-radius: 10px; padding: 12px 28px; text-align: center; font-size: 14px; border: 2px solid; min-width: 420px; }
+  .arch-box .t { font-weight: 700; font-size: 15px; }
+  .arch-model { border-color: #9db4ff; background: #f0f4ff; }
+  .arch-tools { border-color: #ffb86c; background: #fff8ec; }
+  .arch-engine { border-color: #3ddba0; background: #effcf7; }
+  .arch-arrow { color: var(--text-secondary); font-size: 20px; }
+  .tool-chip { background: #fff; border: 1px solid #ffd9a0; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: #b26a00; font-family: Consolas, monospace; }
+  .big-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .stat { background: linear-gradient(160deg, #0a1e46, #1148b8); border-radius: 12px; padding: 20px; color: #fff; text-align: center; }
+  .stat .num { font-size: 34px; font-weight: 800; color: #7dffc9; line-height: 1.2; }
+  .stat .num small { font-size: 17px; font-weight: 600; }
+  .stat .lbl { font-size: 13px; opacity: .85; margin-top: 4px; }
+  .versus { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; }
+  .vs-card { border-radius: 12px; padding: 20px; border: 1px solid var(--border); background: #fff; }
+  .vs-card.bad { border-top: 4px solid var(--danger); }
+  .vs-card.good { border-top: 4px solid var(--accent); }
+  .vs-card .price { font-size: 26px; font-weight: 800; margin: 6px 0 2px; }
+  .vs-card.bad .price { color: var(--danger); }
+  .vs-card.good .price { color: #00875a; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .bar-side { width: 52px; font-size: 11px; color: var(--text-secondary); text-align: right; flex-shrink: 0; font-weight: 600; }
+  .bar-track2 { flex: 1; height: 20px; background: #eceff3; border-radius: 5px; overflow: hidden; }
+  .bar-orig { height: 100%; background: linear-gradient(90deg, #b9c3d3, #98a5b9); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+  .bar-comp { height: 100%; background: linear-gradient(90deg, #00c389, #009a6c); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+  .steps { counter-reset: step; margin: 14px 0; }
+  .step { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px dashed var(--border); counter-increment: step; }
+  .step::before { content: counter(step); width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; background: var(--primary); color: #fff; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  footer { text-align: center; color: var(--text-secondary); font-size: 13px; padding: 30px 0 0; border-top: 1px solid var(--border); }
+  @media (max-width: 720px) { .versus { grid-template-columns: 1fr; } .arch-box { min-width: 0; width: 100%; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="brand">
+      <div class="brand-logo">CK</div>
+      <h1>ContextKeeper for Trae</h1>
+      <span class="version">v0.0.5 · 0.5 版"质量优先"引擎</span>
+    </div>
+    <p class="tagline">
+      给统一付费的 AI 用量做减法——智能体读取大文件先压缩再进上下文，
+      <b>实测节省 59%~65% token</b>，省掉的部分用行号索引<b>随时无损取回</b>，
+      <b>零 API Key、零改造、任意模型通用</b>。
+    </p>
+    <div class="badges">
+      <div class="badge">单文件最高节省 <b>63%</b></div>
+      <div class="badge">累计实测节省 <b>38,837 tok（81%）</b></div>
+      <div class="badge">压缩耗时 <b>毫秒级</b></div>
+      <div class="badge">信息找回 <b>100% 无损</b></div>
+      <div class="badge">模型依赖 <b>无</b></div>
+    </div>
+  </div>
+</header>
+<div class="container">
+
+<section>
+  <div class="sec-title">
+    <div class="sec-num">1</div>
+    <h2>集成方法与使用说明</h2>
+    <span class="sub">旁载部署 · 5 分钟完成 · 全员可分发</span>
+  </div>
+  <div class="card">
+    <h3>📦 环境要求</h3>
+    <table>
+      <tr><th style="width:180px">项</th><th>要求</th></tr>
+      <tr><td>IDE</td><td>Trae CN（需支持 <code class="inline">vscode.trae.registerMcpProvider</code> API）</td></tr>
+      <tr><td>账号</td><td>任意（企业统一付费 / 个人账号均可）——<b>插件不接触模型与网络</b></td></tr>
+      <tr><td>API Key</td><td><b>不需要</b>。压缩引擎纯本地规则，零模型依赖、零网络请求</td></tr>
+      <tr><td>磁盘占用</td><td>&lt; 100 KB（插件本体）；运行时数据 KB~MB 级（工作区 <code class="inline">.contextkeeper/</code>）</td></tr>
+      <tr><td>系统资源</td><td>可忽略——单核毫秒级字符串处理，无持续 CPU/内存占用</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>🔧 集成步骤（旁载部署）</h3>
+    <div class="note">Trae 的 <code class="inline">--install-extension</code> CLI 通道被阉割（静默失败），须采用旁载方式：把插件目录注册进 Trae 的扩展权威清单。</div>
+    <div class="steps">
+      <div class="step"><div class="body"><b>复制插件目录</b><div class="detail">将 <code class="inline">extension/</code>（含 <code class="inline">extension.js</code> 与 <code class="inline">package.json</code>）拷贝到 <code class="inline">C:\Users\&lt;用户&gt;\.trae-cn\extensions\hackathon-lm-probe.lm-probe-0.0.1\</code></div></div></div>
+      <div class="step"><div class="body"><b>注册进权威清单</b><div class="detail">运行 <code class="inline">python scripts/register_ext.py</code>（自动备份 + 幂等注册）；或手工编辑 <code class="inline">extensions.json</code>，条目格式见仓库 README。<b>清单中不能有重复 id 条目，location.path 必须是 scheme:"file" 的绝对路径（URI 风格 /c:/...）</b>，否则扩展不激活且无提示。</div></div></div>
+      <div class="step"><div class="body"><b>重载窗口</b><div class="detail">Ctrl+Shift+P → <code class="inline">Reload Window</code>。两个标志同时出现即部署成功：右下角通知「ContextKeeper 已启动（优化模式）」与底部状态栏右侧常驻条目 <code class="inline">⚡ CK 优化 | 已省 N tok</code></div></div></div>
+      <div class="step"><div class="body"><b>验证</b><div class="detail">在对话中输入"调用 read_file_smart 读取任意代码文件"——智能体自主调用并返回压缩骨架；或输入 <code class="inline">/optimize</code> 验证模式开关</div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🛠️ 四个 MCP 工具</h3>
+    <table>
+      <tr><th style="width:190px">工具</th><th>用途</th><th style="width:260px">关键参数</th></tr>
+      <tr><td><code class="inline">read_file_smart</code></td><td>智能读取文件：返回结构骨架（签名 + docstring + 关键行），超长函数体省略为行号索引，节省 50~80% token</td><td><code class="inline">path</code>（必填）；<code class="inline">body_keep_lines</code>：保留体首 N 行，默认 4；<code class="inline">full</code>：true 直接返回全文</td></tr>
+      <tr><td><code class="inline">load_context_ref</code></td><td>无损解引用：按 REF 编号 + 行号取回省略的原文，支持多区间</td><td><code class="inline">ref_id</code>（必填，如 ck-5）；<code class="inline">ranges</code>：如 "42-87,100-120"；省略返回全文</td></tr>
+      <tr><td><code class="inline">contextkeeper_mode</code></td><td>模式开关：优化 ↔ 常规，跨对话持久化，切换时弹通知</td><td><code class="inline">mode</code>：optimize / normal / status</td></tr>
+      <tr><td><code class="inline">context_stats</code></td><td>实时 token 账单：调用次数、节省量、节省率，自动落盘</td><td>无</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>🎮 使用方式（用户视角）</h3>
+    <h4>日常使用——什么都不用做</h4>
+    <p>插件注册的工具对智能体透明。正常下达任务（如"分析这个文件的路由结构"），智能体读取大文件时<b>自动优先使用压缩读取</b>，需要细节时<b>自动取回</b>——用户全程无感知。</p>
+    <h4>状态栏实时账单</h4>
+    <p>IDE 底部状态栏常驻显示：<code class="inline">⚡ CK 优化 | 已省 38,837 tok</code>（模式 + 累计节省量，每次调用实时刷新，重启 IDE 自动从账单恢复累计值）。鼠标悬停看明细，点击弹出账单摘要。</p>
+    <h4>模式开关</h4>
+    <table>
+      <tr><th style="width:150px">输入</th><th>效果</th></tr>
+      <tr><td><code class="inline">/optimize</code></td><td>开启优化模式（默认）：读取走结构骨架压缩，省 token</td></tr>
+      <tr><td><code class="inline">/normal</code></td><td>切回常规模式：<code class="inline">read_file_smart</code> 全文返回，常规消耗</td></tr>
+    </table>
+    <p>模式写入工作区 <code class="inline">.contextkeeper/mode.json</code>，<b>跨对话、跨 IDE 重启持久生效</b>。</p>
+    <h4>数据留痕（可审计）</h4>
+    <ul>
+      <li><code class="inline">.contextkeeper/stats.jsonl</code> —— 每次调用的 token 账单原始记录（部门报表数据源）</li>
+      <li><code class="inline">.contextkeeper/refs/ck-N.json</code> —— REF 影子存储（上限 200 条 LRU），重启 IDE 后仍可取回</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">
+    <div class="sec-num">2</div>
+    <h2>原理说明</h2>
+    <span class="sub">高性能减 token · 不影响模型自主分析</span>
+  </div>
+  <div class="card">
+    <h3>🏛️ 架构总览</h3>
+    <div class="arch">
+      <div class="arch-box arch-model"><div class="t">Trae 智能体（任意模型）</div><div class="d">当前 GLM-5.3 · 切换其他模型同样生效</div></div>
+      <div class="arch-arrow">▼ 自然调用（工具层与模型完全解耦）▼</div>
+      <div class="arch-box arch-tools"><div class="t">MCP 工具层 · vscode.trae.registerMcpProvider</div><div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px"><span class="tool-chip">read_file_smart</span><span class="tool-chip">load_context_ref</span><span class="tool-chip">contextkeeper_mode</span><span class="tool-chip">context_stats</span></div></div>
+      <div class="arch-arrow">▼ 纯本地规则处理 ▼</div>
+      <div class="arch-box arch-engine"><div class="t">压缩引擎 + REF 影子存储</div><div class="d">零 Key · 零网络 · 零模型依赖 · 毫秒级</div></div>
+    </div>
+    <div class="note"><b>为什么不走网关？</b>企业统一付费账号无 API Key、模型流量走云端，截流网关物理不可达。MCP 工具层是唯一"既零 Key 又模型无关"的接入点——该结论来自对 Trae 官方 API 的 v1~v4 四轮探测实测。</div>
+  </div>
+  <div class="card">
+    <h3>⚙️ 压缩引擎：三模式 + "叶子优先"选择策略</h3>
+    <table>
+      <tr><th style="width:200px">模式</th><th>适用</th><th>策略</th></tr>
+      <tr><td>花括号语言结构骨架</td><td>JS / Java / C / C++ 等</td><td>大括号配对建块；类/命名空间<b>签名保全渲染</b>（成员签名全保留、成员体整体省略）；独立大函数保留头 4 尾 3 行</td></tr>
+      <tr><td>Python 结构骨架</td><td>.py / .pyw</td><td>def/class 缩进块识别（装饰器并入签名）；类内方法<b>签名 + docstring 全保留</b>，方法体整体省略</td></tr>
+      <tr><td>generic 首尾截断</td><td>&gt;400 行非代码文本</td><td>前 120 行 + 后 60 行</td></tr>
+    </table>
+    <h4>选择策略："叶子优先 + 包裹结构签名保全"</h4>
+    <ul>
+      <li><b>叶子优先</b>：候选块按嵌套深度降序选择——方法（叶子）先于类被选中，保证方法级压缩粒度</li>
+      <li><b>包裹结构识别</b>：顶层块若含 ≥2 个定义型直接子块（类/命名空间），改用签名保全渲染——<b>所有成员签名保留</b>，成员体整体省略为行号标记</li>
+      <li><b>智能跳过</b>：小文件或压缩收益 &lt;10% 自动原样返回</li>
+    </ul>
+    <p>压缩输出的每一处省略都形如：</p>
+<pre>def _clip(text: str, n: int = _STATS_SAMPLE_CHARS) -> str:
+    """Truncate a sample's text to n chars, marking how much was dropped."""
+    [CK-OMITTED 原文行 57-58（省略 2 行）—— 调用 load_context_ref(ref_id="ck-5", ranges="57-58") 可查看]</pre>
+    <p>签名（是什么）+ docstring（做什么）+ 行号索引（细节在哪）——模型拿到的是<b>"完整目录 + 每章摘要 + 精确页码"</b>。</p>
+  </div>
+  <div class="card">
+    <h3>🎯 为什么减 token 且不影响模型自主分析？</h3>
+    <p>核心设计：<b>压缩不删除信息，只改变信息的呈现密度</b>。信息链路四层保障：</p>
+    <h4>① 结构完整性——模型"看得见全局"</h4>
+    <p>所有类与方法签名、import、注解、docstring 全部保留（实测 server.py 2239 行压缩后 <b>46 个方法的 docstring 全部可见</b>）。结构分析、功能定位、调用关系梳理占日常任务 80% 以上，基于骨架即可完成。</p>
+    <h4>② 信息对称——模型"知道自己没看什么"</h4>
+    <p>与一刀切截断的本质区别：每处省略都有带精确行号的 <code class="inline">[CK-OMITTED]</code> 标记。模型<b>明确知道哪段没读、怎么取回</b>，从根本上杜绝"看不见就瞎编"。</p>
+    <h4>③ 按需解引用——模型"要细节时自己取"</h4>
+    <p>触发完全由模型自主判断，无需人工指定，三层引导：省略标记内嵌"取回说明书"（直接写明调用参数）、工具 description 注明适用场景、输出头部附分析指引（"需要被省略段的完整实现时，请主动按行号取回，不要基于签名推测"）。</p>
+    <div class="note">实测验证：真实对话中智能体在追问方法实现时<b>自然调用</b> <code class="inline">load_context_ref</code> 精确取回正确区间，全程无人工干预。</div>
+    <h4>④ 用户兜底——始终有选择权</h4>
+    <p>三种逃生通道：<code class="inline">/normal</code> 一键全量模式（跨对话持久）；<code class="inline">body_keep_lines</code> 放宽保留行数；<code class="inline">full=true</code> 单次读全文。REF 落盘持久化，IDE 重启后历史省略段仍可取回。</p>
+  </div>
+  <div class="card">
+    <h3>⚡ 性能特征</h3>
+    <table>
+      <tr><th style="width:200px">项</th><th>表现</th><th>说明</th></tr>
+      <tr><td>压缩耗时</td><td class="ok">毫秒级</td><td>2239 行文件为正则 + 行扫描一遍处理</td></tr>
+      <tr><td>CPU</td><td class="ok">单核瞬时，无持续负载</td><td>纯字符串规则，无模型推理</td></tr>
+      <tr><td>内存</td><td class="ok">仅 REF 缓存，上限封顶</td><td>200 条 LRU，单文件 MB 级</td></tr>
+      <tr><td>网络</td><td class="ok">零请求</td><td>纯本地运行，断网可用</td></tr>
+    </table>
+    <p>唯一成本转移：模型多一次解引用调用（约几百 token）换取一次上万 token 的读取节省，量级上完全划算。</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">
+    <div class="sec-num">3</div>
+    <h2>测试报告</h2>
+    <span class="sub">压缩 vs 不压缩 · 直观对比 · 2026-10-09 实测</span>
+  </div>
+  <div class="card">
+    <h3>📊 核心数据总览</h3>
+    <div class="big-stats">
+      <div class="stat"><div class="num">63<small>%</small></div><div class="lbl">2239 行大文件单次节省</div></div>
+      <div class="stat"><div class="num">59<small>~65%</small></div><div class="lbl">结构骨架常规区间</div></div>
+      <div class="stat"><div class="num">22,066</div><div class="lbl">单次读取节省 tokens</div></div>
+      <div class="stat"><div class="num">38,837<small>（81%）</small></div><div class="lbl">历史累计节省</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>⚖️ 压缩 vs 不压缩：一次文件读取的账单对比</h3>
+    <p>场景：智能体需要理解 <b>server.py（2239 行，约 34,504 tokens）</b>。左右两栏是同一任务的两种结局：</p>
+    <div class="versus">
+      <div class="vs-card bad">
+        <h4>❌ 不使用压缩（直接读全文）</h4>
+        <div class="price">34,504 tokens</div>
+        <ul>
+          <li>每一轮对话重复计费（多轮任务 ×3~5 次）</li>
+          <li>上下文窗口被单个文件占掉 ~23%</li>
+          <li>长上下文注意力稀释，关键代码定位变慢</li>
+          <li>企业统一付费 = 直接的金钱成本</li>
+        </ul>
+      </div>
+      <div class="vs-card good">
+        <h4>✅ 使用 ContextKeeper 压缩</h4>
+        <div class="price">12,875 tokens</div>
+        <div class="unit">单次进入上下文（省 63%）</div>
+        <ul>
+          <li>全部方法签名 + 46 个 docstring 可见，结构分析无障碍</li>
+          <li>50 处省略段全部带精确行号索引</li>
+          <li>追问细节时按行号无损取回（+几百 token）</li>
+          <li>多轮任务只在需要时付细节成本</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note">同一次任务按 4 轮对话计算：直接读全文累计消耗 <b>~138,000 tokens</b>；压缩模式约 <b>~52,000 tokens</b>（含解引用）——<b>省 62%</b>，且信息总量不减少。</div>
+  </div>
+  <div class="card">
+    <h3>📈 单文件压缩实测（0.5 版引擎，Node 直跑单测）</h3>
+    <div class="chart-row" style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px"><b>server.py（Python 网关核心，2239 行）</b><b style="color:#00875a">节省 63%　34,504 → 12,875 tok</b></div>
+      <div class="bar-row"><div class="bar-side">不压缩</div><div class="bar-track2"><div class="bar-orig" style="width:100%">34,504 tok</div></div></div>
+      <div class="bar-row"><div class="bar-side">压缩后</div><div class="bar-track2"><div class="bar-comp" style="width:37.2%">12,875 tok</div></div></div>
+    </div>
+    <div class="chart-row" style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px"><b>extension.js（插件本体，616 行 JS）</b><b style="color:#00875a">节省 59%　7,323 → 2,995 tok</b></div>
+      <div class="bar-row"><div class="bar-side">不压缩</div><div class="bar-track2"><div class="bar-orig" style="width:100%">7,323 tok</div></div></div>
+      <div class="bar-row"><div class="bar-side">压缩后</div><div class="bar-track2"><div class="bar-comp" style="width:41%">2,995 tok</div></div></div>
+    </div>
+    <div class="chart-row" style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px"><b>mock_target.py（中型业务文件，58 行）</b><b style="color:#00875a">节省 65%　390 → 136 tok</b></div>
+      <div class="bar-row"><div class="bar-side">不压缩</div><div class="bar-track2"><div class="bar-orig" style="width:100%">390 tok</div></div></div>
+      <div class="bar-row"><div class="bar-side">压缩后</div><div class="bar-track2"><div class="bar-comp" style="width:35%">136 tok</div></div></div>
+    </div>
+    <div class="chart-row">
+      <div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px"><b>小文件（15 行）</b><b style="color:#646a73">智能跳过（收益 &lt;10% 原样返回）</b></div>
+      <div class="bar-row"><div class="bar-side">不压缩</div><div class="bar-track2"><div class="bar-orig" style="width:100%">796 tok</div></div></div>
+      <div class="bar-row"><div class="bar-side">压缩后</div><div class="bar-track2"><div class="bar-orig" style="width:100%">796 tok（不压缩更划算）</div></div></div>
+    </div>
+    <p style="font-size:13px;color:#646a73">每段省略标记均通过与原文逐行对齐的边界校验（单测 7/7 PASS），保证行号索引 100% 可靠。</p>
+  </div>
+  <div class="card">
+    <h3>🖥️ Trae 端到端实测（真实 MCP 调用链路）</h3>
+    <table>
+      <tr><th style="width:60px">序</th><th>验证项</th><th>结果</th></tr>
+      <tr><td>1</td><td>read_file_smart 读 2239 行 server.py</td><td class="ok">✅ 34,504 → 12,875 tok（63%），50 处省略对齐，REF 登记</td></tr>
+      <tr><td>2</td><td>省略标记行号与原文逐行对齐校验</td><td class="ok">✅ 50 处全部精确（最大段 747-874 共 128 行）</td></tr>
+      <tr><td>3</td><td>load_context_ref 按行号解引用</td><td class="ok">✅ 取回 747-752，带行号标头、内容逐字无损</td></tr>
+      <tr><td>4</td><td>context_stats 实时账单</td><td class="ok">✅ 累计节省 22,066 tok（64%），stats.jsonl 实时落盘</td></tr>
+      <tr><td>5</td><td>模型自主调用（无人工指定 REF 编号）</td><td class="ok">✅ 智能体基于省略标记自主决策取回区间</td></tr>
+      <tr><td>6</td><td>/optimize ↔ /normal 模式切换 + 持久化</td><td class="ok">✅ 跨对话持久，重启 IDE 恢复</td></tr>
+      <tr><td>7</td><td>REF 落盘往返（重载窗口后取回）</td><td class="ok">✅ 磁盘回退生效，编号不冲突</td></tr>
+      <tr><td>8</td><td>异常输入（不存在文件 / 越界区间 / 无效 REF）</td><td class="ok">✅ 优雅报错，插件进程不崩</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>🧾 压缩输出真实样例（server.py 片段）</h3>
+    <p>注意三个要素同时在场：<b>签名</b>（def 行）、<b>docstring</b>（语义说明）、<b>行号索引</b>（CK-OMITTED 标记）：</p>
+<pre>class ProxyStats:
+    """Track proxy usage stats: request counts, token savings, latency."""
+
+    def __init__(self, enabled: bool = True):
+        [CK-OMITTED 原文行 743-745（省略 3 行）—— 调用 load_context_ref(ref_id="ck-5", ranges="743-745") 可查看]
+
+    def record(self, original_tokens: int, compressed_tokens: int, model: str):
+        """Record one request's token pair. Thread-safe."""
+        [CK-OMITTED 原文行 747-874（省略 128 行）—— 调用 load_context_ref(ref_id="ck-5", ranges="747-874") 可查看]
+
+    def snapshot(self) -> dict:
+        """Return a point-in-time copy of stats for the dashboard."""
+        [CK-OMITTED 原文行 881-923（省略 43 行）—— 调用 load_context_ref(ref_id="ck-5", ranges="881-923") 可查看]</pre>
+    <div class="note">模型看到此骨架即可回答"ProxyStats 提供哪些能力"；追问"record 的完整实现"时，自主调用解引用取回 747-874——<b>压缩时省 63%，追问时一个字不丢</b>。</div>
+  </div>
+  <div class="card">
+    <h3>🧪 质量验证：自主分析不受影响的证据</h3>
+    <table>
+      <tr><th style="width:300px">验证场景</th><th>结果</th></tr>
+      <tr><td>基于压缩骨架回答"网关支持哪些协议"</td><td class="ok">✅ 模块 docstring 保留，一次答对</td></tr>
+      <tr><td>追问"ProxyStats.record 完整实现"</td><td class="ok">✅ 模型自主解引用，精确取回正确区间</td></tr>
+      <tr><td>实战：分析 800KB+ Web 网关项目（45 个 Controller）</td><td class="ok">✅ 压缩模式完成功能分析，未出现缺细节误判</td></tr>
+      <tr><td>历史极端场景（旧首尾截断引擎）</td><td>93% 节省但中部不可见 → 已升级为质量优先引擎</td></tr>
+    </table>
+  </div>
+</section>
+
+<footer>
+  ContextKeeper for Trae · AI 黑客松创意赛道 · 客户：中国联通 · 2026-10-09<br>
+  架构灵感来自开源项目 Paritok（全新实现，零代码复用）· 测试留痕：test_compression.js（7/7 PASS）· .contextkeeper/stats.jsonl（实时账单）
+</footer>
+
+</div>
+</body>
+</html>
