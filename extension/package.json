@@ -1,0 +1,11 @@
+{
+  "name": "lm-probe",
+  "displayName": "ContextKeeper (MVP)",
+  "description": "ContextKeeper: rule-based context compression MCP tools for Trae (read_file_smart / load_context_ref / context_stats / contextkeeper_mode)",
+  "version": "0.0.5",
+  "publisher": "hackathon-lm-probe",
+  "engines": { "vscode": "^1.90.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js"
+}
